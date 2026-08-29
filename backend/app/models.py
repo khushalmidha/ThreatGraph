@@ -1,0 +1,137 @@
+from sqlalchemy import Column, String, Integer, Float, DateTime, ForeignKey, Boolean
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import relationship
+from .database import Base
+from datetime import datetime
+
+class Host(Base):
+    __tablename__ = "hosts"
+    host_id = Column(String, primary_key=True, index=True)
+    ip_address = Column(String, index=True)
+    hostname = Column(String)
+    host_type = Column(String)
+    criticality = Column(String)
+    first_seen = Column(DateTime, default=datetime.utcnow)
+    last_seen = Column(DateTime, default=datetime.utcnow)
+
+class NetworkFlow(Base):
+    __tablename__ = "network_flows"
+    event_id = Column(String, primary_key=True, index=True)
+    timestamp = Column(DateTime, index=True)
+    src_ip = Column(String, index=True)
+    dst_ip = Column(String, index=True)
+    src_port = Column(Integer)
+    dst_port = Column(Integer)
+    protocol = Column(String)
+    packets = Column(Integer)
+    bytes = Column(Integer)
+    duration_ms = Column(Float)
+    vlan = Column(Integer)
+    direction = Column(String)
+    event_version = Column(String)
+
+class GraphEvent(Base):
+    __tablename__ = "graph_events"
+    event_id = Column(String, primary_key=True, index=True)
+    timestamp = Column(DateTime, index=True)
+    node_a = Column(String, index=True)
+    node_b = Column(String, index=True)
+    edge_type = Column(String)
+    edge_features = Column(JSONB)
+
+class Feature(Base):
+    __tablename__ = "features"
+    feature_id = Column(String, primary_key=True, index=True)
+    timestamp = Column(DateTime, index=True)
+    host_id = Column(String, index=True)
+    window_size = Column(String)
+    feature_vector = Column(JSONB)
+
+class ModelPrediction(Base):
+    __tablename__ = "model_predictions"
+    prediction_id = Column(String, primary_key=True, index=True)
+    timestamp = Column(DateTime, index=True)
+    host_id = Column(String, index=True)
+    model_version = Column(String)
+    threat_probability = Column(Float)
+    threat_class = Column(String)
+    anomaly_score = Column(Float)
+
+class Anomaly(Base):
+    __tablename__ = "anomalies"
+    anomaly_id = Column(String, primary_key=True, index=True)
+    timestamp = Column(DateTime, index=True)
+    host_id = Column(String, index=True)
+    score = Column(Float)
+    description = Column(String)
+
+class Alert(Base):
+    __tablename__ = "alerts"
+    alert_id = Column(String, primary_key=True, index=True)
+    timestamp = Column(DateTime, index=True)
+    host_id = Column(String, index=True)
+    severity = Column(String)
+    evidence = Column(JSONB)
+
+class Incident(Base):
+    __tablename__ = "incidents"
+    incident_id = Column(String, primary_key=True, index=True)
+    timestamp = Column(DateTime, index=True)
+    primary_host_id = Column(String, index=True)
+    status = Column(String, index=True)
+    severity = Column(String, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class AttackPath(Base):
+    __tablename__ = "attack_paths"
+    path_id = Column(String, primary_key=True, index=True)
+    incident_id = Column(String, ForeignKey("incidents.incident_id"), index=True)
+    source_host = Column(String)
+    dest_host = Column(String)
+    risk_contribution = Column(Float)
+    evidence = Column(JSONB)
+
+class RiskScore(Base):
+    __tablename__ = "risk_scores"
+    risk_id = Column(String, primary_key=True, index=True)
+    timestamp = Column(DateTime, index=True)
+    host_id = Column(String, index=True)
+    score = Column(Float)
+    severity_band = Column(String)
+    evidence = Column(JSONB)
+
+class ContainmentAction(Base):
+    __tablename__ = "containment_actions"
+    action_id = Column(String, primary_key=True, index=True)
+    timestamp = Column(DateTime, index=True)
+    host_id = Column(String, index=True)
+    policy_applied = Column(String)
+    reason = Column(String)
+    status = Column(String)
+
+class NetworkPolicy(Base):
+    __tablename__ = "network_policies"
+    policy_id = Column(String, primary_key=True, index=True)
+    zone_source = Column(String)
+    zone_dest = Column(String)
+    action = Column(String)
+    port = Column(Integer)
+    protocol = Column(String)
+
+class AuditLog(Base):
+    __tablename__ = "audit_logs"
+    log_id = Column(String, primary_key=True, index=True)
+    timestamp = Column(DateTime, index=True)
+    user_id = Column(String)
+    action = Column(String)
+    target = Column(String)
+    result = Column(String)
+
+class ModelVersion(Base):
+    __tablename__ = "model_versions"
+    version_id = Column(String, primary_key=True, index=True)
+    trained_at = Column(DateTime)
+    dataset_ref = Column(String)
+    metrics = Column(JSONB)
+    is_active = Column(Boolean, default=False)
