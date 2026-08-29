@@ -191,6 +191,52 @@ def get_alerts(): return {"detail": "Not Implemented"}
 @app.get("/models", status_code=status.HTTP_501_NOT_IMPLEMENTED)
 def get_models(): return {"detail": "Not Implemented"}
 
+@app.post("/soc/investigate/{incident_id}")
+def investigate_incident(incident_id: str, db: Session = Depends(get_db)):
+    from app.models import Incident
+    incident = db.query(Incident).filter(Incident.incident_id == incident_id).first()
+    if not incident:
+        raise HTTPException(status_code=404, detail="Incident not found")
+        
+    # Get attack path
+    path_data = get_incident_attack_path(incident_id, db)
+    
+    # Retrieve context
+    import sys, os
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
+    from rag.engine import SimpleRAGEngine
+    from app.soc.llm import SOCAnalystLLM
+    
+    rag = SimpleRAGEngine()
+    query = f"lateral movement from {incident.target_host} high risk"
+    context = rag.retrieve(query)
+    
+    llm = SOCAnalystLLM()
+    report = llm.investigate(
+        incident={"target_host": incident.target_host, "severity": incident.severity, "risk_score": incident.risk_score, "updated_at": str(incident.updated_at)},
+        attack_path=path_data,
+        context=context
+    )
+    return {"report": report}
+
+from pydantic import BaseModel
+class QueryRequest(BaseModel):
+    query: str
+
+@app.post("/soc/query")
+def soc_query(req: QueryRequest):
+    import sys, os
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
+    from rag.engine import SimpleRAGEngine
+    from app.soc.llm import SOCAnalystLLM
+    
+    rag = SimpleRAGEngine()
+    context = rag.retrieve(req.query)
+    
+    llm = SOCAnalystLLM()
+    answer = llm.query(req.query, context)
+    return {"answer": answer}
+
 @app.get("/models/{id}/metrics", status_code=status.HTTP_501_NOT_IMPLEMENTED)
 def get_model_metrics(id: str): return {"detail": "Not Implemented"}
 
