@@ -166,8 +166,24 @@ def stream_alerts():
 @app.get("/threats", status_code=status.HTTP_501_NOT_IMPLEMENTED)
 def get_threats(): return {"detail": "Not Implemented"}
 
-@app.get("/incidents/{id}/attack-path", status_code=status.HTTP_501_NOT_IMPLEMENTED)
-def get_incident_attack_path(id: str): return {"detail": "Not Implemented"}
+@app.get("/incidents/{id}/attack-path")
+def get_incident_attack_path(id: str, db: Session = Depends(get_db)):
+    from app.models import Incident
+    incident = db.query(Incident).filter(Incident.incident_id == id).first()
+    if not incident:
+        raise HTTPException(status_code=404, detail="Incident not found")
+        
+    from app.graph.queries import get_current_topology
+    from app.graph.attack_path import AttackPathBuilder
+    
+    topology = get_current_topology(db, lookback_sec=3600)
+    builder = AttackPathBuilder()
+    builder.build_from_topology(topology)
+    
+    all_hosts = list(set([edge["source"] for edge in topology] + [edge["target"] for edge in topology]))
+    
+    path_data = builder.generate_attack_path_record(id, incident.target_host, all_hosts)
+    return path_data
 
 @app.get("/alerts", status_code=status.HTTP_501_NOT_IMPLEMENTED)
 def get_alerts(): return {"detail": "Not Implemented"}
