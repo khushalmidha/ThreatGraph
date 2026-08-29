@@ -1,0 +1,50 @@
+## PHASE 17 — Documentation + Resume Bullets
+
+
+
+**Goal:** Make the finished project legible to a reviewer in five minutes.
+
+
+
+**Do:**
+
+1. Full `README.md` per the spec's outline (Overview, Problem Statement, Why Graph+Transformer, Architecture, Data Pipeline, Network Model, Feature Engineering, Temporal Modeling, Graph Modeling, Model Architecture, Training Pipeline, Dataset Methodology, Threat Scenarios, Attack Graph, Risk Engine, LLM SOC Analyst, RAG, MITRE ATT&CK, Containment Simulation, Networking Concepts, Docker Setup, API Docs, Benchmark Results, ML Results, Ablation Study, Limitations, Security Considerations, Future Work) with the Mermaid architecture diagram embedded.
+
+2. Walk the Final Acceptance Criteria checklist from the original spec item by item and confirm each box honestly — note anything genuinely unfinished under "Future Work" rather than silently checking it off.
+
+3. `docs/resume_bullets.md` — Cisco / NVIDIA / Rubrik / General ML / General Backend versions, built **only** from the real numbers produced in Phases 7 and 15 (no invented accuracy/F1/throughput/latency/speedup/host-count/event-count figures).
+
+
+
+**Acceptance checks:**
+
+- Every metric quoted in `docs/resume_bullets.md` traces back to a specific file in `docs/results/` or `docs/benchmarks/`.
+
+
+
+**Commit checkpoint:** `phase 17 — final documentation and resume bullets`
+
+
+
+---
+
+
+
+## Notes on the restructuring
+
+
+
+- The original 55-section prompt is preserved in substance; this file reorders it around **sequenced, independently-committable units of work** rather than topic sections, so Antigravity always has a bounded, testable target instead of the whole system at once.
+
+- Sections 51 (company-specific angles) and 52 (engineering rules) are folded into the Global Rules block and Phase 17, since they're cross-cutting rather than a build step.
+
+- If you want fewer/larger checkpoints (e.g. one commit per day instead of one per subsystem), the natural merge points are: Phases 5+6 (both are "train a model" work), Phases 8+9 (both are "post-detection reasoning" work), and Phases 13+14 into whichever of Phase 10/12 you're already deep in.
+
+you have to implement it in phases and do it carefully and correctly here is repo https://github.com/khushalmidha/ThreatGraph
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-08-29T17:58:45+05:30.
+</ADDITIONAL_METADATA>
+<USER_SETTINGS_CHANGE>
+The user changed setting `Model Selection` from None to Gemini 3.1 Pro (High). No need to comment on this change if the user doesn't ask about it. If reporting what model you are, please use a human readable name instead of the exact string.
+</USER_SETTINGS_CHANGE>
