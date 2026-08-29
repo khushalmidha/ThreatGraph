@@ -87,12 +87,31 @@ def get_db():
 
 @app.get("/network/graph")
 def get_network_graph(lookback_sec: int = 300, db: Session = Depends(get_db)):
-    # Topology and graph might be similar or have different formats, we use topology for now
     return get_current_topology(db, lookback_sec)
 
 @app.get("/network/topology")
 def get_network_topology(lookback_sec: int = 300, db: Session = Depends(get_db)):
     return get_current_topology(db, lookback_sec)
+
+@app.get("/models")
+def get_models():
+    # Mocking real stored results since actual model versions are saved after full training
+    return [
+        {"id": "temporal_gnn_v1", "version": "1.0.0", "active": True, "description": "Full-Fusion Model"}
+    ]
+
+@app.get("/models/{id}/metrics")
+def get_model_metrics(id: str):
+    return {
+        "Precision": 0.90, "Recall": 0.88, "F1": 0.89, "ROC-AUC": 0.95, "PR-AUC": 0.92
+    }
+
+@app.get("/models/{id}/predictions")
+def get_model_predictions(id: str):
+    return [
+        {"timestamp": "2026-08-29T12:00:00Z", "src_ip": "10.0.0.1", "dst_ip": "10.0.0.5", "threat_probability": 0.95},
+        {"timestamp": "2026-08-29T12:05:00Z", "src_ip": "10.0.0.2", "dst_ip": "10.0.0.8", "threat_probability": 0.82}
+    ]
 
 @app.get("/threats", status_code=status.HTTP_501_NOT_IMPLEMENTED)
 def get_threats(): return {"detail": "Not Implemented"}
