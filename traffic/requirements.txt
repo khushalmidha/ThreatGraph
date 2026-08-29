@@ -1,0 +1,2 @@
+aiokafka==0.10.0
+pandas==2.2.1
