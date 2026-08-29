@@ -240,23 +240,59 @@ def soc_query(req: QueryRequest):
 @app.get("/models/{id}/metrics", status_code=status.HTTP_501_NOT_IMPLEMENTED)
 def get_model_metrics(id: str): return {"detail": "Not Implemented"}
 
-@app.get("/models/{id}/predictions", status_code=status.HTTP_501_NOT_IMPLEMENTED)
-def get_model_predictions(id: str): return {"detail": "Not Implemented"}
+@app.post("/containment/isolate/{host_id}")
+def isolate_host(host_id: str, db: Session = Depends(get_db)):
+    import sys, os
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+    from simulation.policies import firewall
+    from app.models import ContainmentAction
+    
+    firewall.isolate_host(host_id)
+    
+    action = ContainmentAction(
+        host_id=host_id,
+        action="ISOLATE",
+        policy="DENY_ALL",
+        reason="Manual Analyst Approval",
+        status="ACTIVE"
+    )
+    db.add(action)
+    db.commit()
+    
+    return {"status": "success", "host_id": host_id, "state": "ISOLATED"}
 
-@app.post("/containment/isolate/{host_id}", status_code=status.HTTP_501_NOT_IMPLEMENTED)
-def isolate_host(host_id: str): return {"detail": "Not Implemented"}
+@app.post("/containment/release/{host_id}")
+def release_host(host_id: str, db: Session = Depends(get_db)):
+    import sys, os
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+    from simulation.policies import firewall
+    from app.models import ContainmentAction
+    
+    firewall.release_host(host_id)
+    
+    # Mark previous isolate actions as ROLLED_BACK
+    db.query(ContainmentAction).filter(
+        ContainmentAction.host_id == host_id, 
+        ContainmentAction.status == "ACTIVE"
+    ).update({"status": "ROLLED_BACK"})
+    
+    action = ContainmentAction(
+        host_id=host_id,
+        action="RELEASE",
+        policy="ALLOW_ALL",
+        reason="Manual Analyst Rollback",
+        status="ROLLED_BACK"
+    )
+    db.add(action)
+    db.commit()
+    
+    return {"status": "success", "host_id": host_id, "state": "ACTIVE"}
 
-@app.post("/containment/release/{host_id}", status_code=status.HTTP_501_NOT_IMPLEMENTED)
-def release_host(host_id: str): return {"detail": "Not Implemented"}
-
-@app.get("/policies", status_code=status.HTTP_501_NOT_IMPLEMENTED)
-def get_policies(): return {"detail": "Not Implemented"}
-
-@app.post("/policies", status_code=status.HTTP_501_NOT_IMPLEMENTED)
-def create_policy(): return {"detail": "Not Implemented"}
-
-@app.delete("/policies/{id}", status_code=status.HTTP_501_NOT_IMPLEMENTED)
-def delete_policy(id: str): return {"detail": "Not Implemented"}
+@app.get("/policies")
+def get_policies():
+    import sys, os
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+    from simulation.policies import firewall
 
 @app.post("/soc/investigate/{incident_id}", status_code=status.HTTP_501_NOT_IMPLEMENTED)
 def investigate_incident(incident_id: str): return {"detail": "Not Implemented"}

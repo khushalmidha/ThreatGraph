@@ -145,3 +145,14 @@ class ModelVersion(Base):
     dataset_ref = Column(String)
     metrics = Column(JSON)
     is_active = Column(Boolean, default=False)
+
+class ContainmentAction(Base):
+    __tablename__ = "containment_actions"
+    id = Column(Integer, primary_key=True, index=True)
+    host_id = Column(String, index=True)
+    action = Column(String)
+    policy = Column(String)
+    reason = Column(String)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    status = Column(String)
+

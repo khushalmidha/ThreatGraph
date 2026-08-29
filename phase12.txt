@@ -1,0 +1,37 @@
+## PHASE 12 — Containment Simulation
+
+
+
+**Goal:** Safe, simulated enforcement layer — never touches anything real.
+
+
+
+**Do:**
+
+1. `simulation/vlan/`, `simulation/acl/`, `simulation/policies/`: zone model (USER/SERVER/DATABASE/SECURITY/QUARANTINE) with example ACL matrix from the spec.
+
+2. Automatic mode (CRITICAL risk → simulated isolation policy) and manual analyst-approval mode. Full workflow: Detection → Incident → Risk Escalation → Recommended Action → Analyst Approval → Simulated Isolation → Verification → Rollback.
+
+3. `POST /containment/isolate/{host_id}`, `POST /containment/release/{host_id}` — every action logged with host, policy, reason, timestamp, evidence, and rollback capability, persisted to `containment_actions` and `audit_logs`.
+
+4. `GET /policies`, `POST /policies`, `DELETE /policies/{id}` for the simulated network policies.
+
+
+
+**Acceptance checks:**
+
+- Isolating a host visibly changes simulated traffic behavior afterward (e.g., the generator respects the simulated policy and blocked flows show up as denied, not silently dropped from the demo).
+
+- Rollback (`/containment/release`) actually restores prior simulated policy state.
+
+
+
+**Commit checkpoint:** `phase 12 — simulated containment and network segmentation`
+
+
+
+---
+
+
+
+
