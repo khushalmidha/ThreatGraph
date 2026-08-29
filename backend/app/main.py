@@ -113,14 +113,46 @@ def get_model_predictions(id: str):
         {"timestamp": "2026-08-29T12:05:00Z", "src_ip": "10.0.0.2", "dst_ip": "10.0.0.8", "threat_probability": 0.82}
     ]
 
+@app.get("/alerts")
+def get_alerts(db: Session = Depends(get_db)):
+    from app.models import Alert
+    alerts = db.query(Alert).order_by(Alert.timestamp.desc()).limit(50).all()
+    return alerts
+
+@app.get("/incidents")
+def get_incidents(db: Session = Depends(get_db)):
+    from app.models import Incident
+    incidents = db.query(Incident).order_by(Incident.updated_at.desc()).limit(50).all()
+    return incidents
+
+@app.get("/incidents/{id}")
+def get_incident(id: str, db: Session = Depends(get_db)):
+    from app.models import Incident, Alert
+    incident = db.query(Incident).filter(Incident.incident_id == id).first()
+    if not incident:
+        raise HTTPException(status_code=404, detail="Incident not found")
+    alerts = db.query(Alert).filter(Alert.incident_id == id).all()
+    return {"incident": incident, "alerts": alerts}
+
+# SSE Endpoint for real-time updates
+from fastapi.responses import StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime
+import asyncio
+
+async def event_stream():
+    # In a real system, this would consume from the 'alerts' Kafka topic
+    # For now, we simulate SSE heartbeat
+    while True:
+        yield f"data: {{\"type\": \"heartbeat\", \"timestamp\": \"{datetime.utcnow().isoformat()}\"}}\n\n"
+        await asyncio.sleep(5)
+
+@app.get("/stream")
+def stream_alerts():
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
+
 @app.get("/threats", status_code=status.HTTP_501_NOT_IMPLEMENTED)
 def get_threats(): return {"detail": "Not Implemented"}
-
-@app.get("/incidents", status_code=status.HTTP_501_NOT_IMPLEMENTED)
-def get_incidents(): return {"detail": "Not Implemented"}
-
-@app.get("/incidents/{id}", status_code=status.HTTP_501_NOT_IMPLEMENTED)
-def get_incident(id: str): return {"detail": "Not Implemented"}
 
 @app.get("/incidents/{id}/attack-path", status_code=status.HTTP_501_NOT_IMPLEMENTED)
 def get_incident_attack_path(id: str): return {"detail": "Not Implemented"}
