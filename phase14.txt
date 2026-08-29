@@ -1,0 +1,43 @@
+## PHASE 14 — Frontend Dashboard
+
+
+
+**Goal:** The SOC dashboard, wired to real backend data — no mock numbers.
+
+
+
+**Do (can be split into 14A core pages / 14B graph & investigation pages if too large for one run):**
+
+1. React + TypeScript + Vite + Tailwind scaffold, API client layer, WebSocket/SSE hook for live updates.
+
+2. Pages: Overview, Live Threat Monitor, Hosts, Host Details, Incidents, Attack Graph, Network Topology, Detection Models, ML Metrics, SOC Analyst, Containment, Network Policies, System Health.
+
+3. Overview: live-derived stats (monitored hosts, active/critical incidents, isolated hosts, events/sec, detection latency, high-risk hosts, anomaly rate) + charts (threats over time, risk distribution, traffic volume, threat categories, top risky hosts, detection latency) — every number sourced from a real API call.
+
+4. Interactive network graph: node size by traffic/risk, node state (normal/suspicious/critical/isolated), edge thickness by volume, click-through to host details / edge detail popover.
+
+5. Attack path visualization with per-edge evidence.
+
+6. SOC Analyst page: pick an incident, see timeline/evidence/graph/explanation/ATT&CK candidates/affected assets/recommended actions, "Investigate Incident" button calling Phase 11's endpoint, free-text question box grounded in retrieved evidence.
+
+7. Host Details page: identity, risk, traffic timeline, behavioral timeline, graph neighbors, predictions, anomalies, risk/incident history, containment status, "why is this host risky" section.
+
+
+
+**Acceptance checks:**
+
+- Every page renders from a live API call — zero hard-coded placeholder arrays left in the final state (a `grep` for obvious mock-data patterns should come back clean).
+
+- Isolating a host in the Containment page is reflected on the Host Details and Overview pages without a manual refresh (via the WebSocket/SSE channel).
+
+
+
+**Commit checkpoint:** `phase 14 — SOC dashboard frontend`
+
+
+
+---
+
+
+
+
