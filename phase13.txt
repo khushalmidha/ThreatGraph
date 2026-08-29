@@ -1,0 +1,35 @@
+## PHASE 13 — Authentication, RBAC, Audit
+
+
+
+**Goal:** Security-as-first-class-concern, not an afterthought.
+
+
+
+**Do:**
+
+1. JWT auth, password hashing, roles (ADMIN/ANALYST/VIEWER). Only ADMIN/ANALYST can call containment endpoints.
+
+2. Every sensitive action (containment, policy change) generates an audit log entry.
+
+3. Input validation, rate limiting, CORS config, safe error handling (no stack traces leaking to clients), no secrets in the repo — confirm `.env.example` stays accurate.
+
+4. Authorization tests: VIEWER blocked from containment, ADMIN/ANALYST allowed, audit log populated on every attempt (including denied ones).
+
+
+
+**Acceptance checks:**
+
+- A VIEWER-role JWT gets a 403 on `POST /containment/isolate/{id}`; the attempt still appears in `audit_logs`.
+
+
+
+**Commit checkpoint:** `phase 13 — auth, RBAC, audit logging`
+
+
+
+---
+
+
+
+

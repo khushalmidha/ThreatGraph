@@ -150,6 +150,7 @@ def get_host_risk(id: str, db: Session = Depends(get_db)):
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
+from app.auth import require_analyst
 import asyncio
 
 async def event_stream():
@@ -241,11 +242,12 @@ def soc_query(req: QueryRequest):
 def get_model_metrics(id: str): return {"detail": "Not Implemented"}
 
 @app.post("/containment/isolate/{host_id}")
-def isolate_host(host_id: str, db: Session = Depends(get_db)):
+def isolate_host(host_id: str, db: Session = Depends(get_db), user: dict = Depends(require_analyst)):
     import sys, os
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
     from simulation.policies import firewall
     from app.models import ContainmentAction
+    from app.auth import log_audit
     
     firewall.isolate_host(host_id)
     
@@ -258,15 +260,17 @@ def isolate_host(host_id: str, db: Session = Depends(get_db)):
     )
     db.add(action)
     db.commit()
+    log_audit(db, user.get("sub", "unknown"), user.get("role", "ANALYST"), "ISOLATE", host_id, "SUCCESS")
     
     return {"status": "success", "host_id": host_id, "state": "ISOLATED"}
 
 @app.post("/containment/release/{host_id}")
-def release_host(host_id: str, db: Session = Depends(get_db)):
+def release_host(host_id: str, db: Session = Depends(get_db), user: dict = Depends(require_analyst)):
     import sys, os
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
     from simulation.policies import firewall
     from app.models import ContainmentAction
+    from app.auth import log_audit
     
     firewall.release_host(host_id)
     
@@ -285,6 +289,7 @@ def release_host(host_id: str, db: Session = Depends(get_db)):
     )
     db.add(action)
     db.commit()
+    log_audit(db, user.get("sub", "unknown"), user.get("role", "ANALYST"), "RELEASE", host_id, "SUCCESS")
     
     return {"status": "success", "host_id": host_id, "state": "ACTIVE"}
 

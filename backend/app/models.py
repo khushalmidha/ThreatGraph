@@ -156,3 +156,14 @@ class ContainmentAction(Base):
     timestamp = Column(DateTime, default=datetime.utcnow)
     status = Column(String)
 
+
+class AuditLog(Base):
+    __tablename__ = "audit_logs"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, index=True)
+    role = Column(String)
+    action = Column(String)
+    resource = Column(String)
+    status = Column(String)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+
