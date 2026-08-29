@@ -1,0 +1,37 @@
+## PHASE 10 — Incident Engine + Real-Time Wiring
+
+
+
+**Goal:** Wire Kafka → Feature Worker → Graph Worker → Detection Worker → Risk Engine → Incident Service → WebSocket/SSE into one live pipeline.
+
+
+
+**Do:**
+
+1. Detection Worker service running the Phase 7 fused model against live streamed features/graph state.
+
+2. Incident Service: creates/updates `incidents` and `alerts` when risk crosses a threshold, avoiding duplicate-incident spam for the same ongoing behavior.
+
+3. WebSocket/SSE endpoint streaming live incident/risk updates.
+
+4. `GET /alerts`, `GET /incidents`, `GET /incidents/{id}` implemented for real.
+
+5. Observability: events processed/dropped, Kafka consumer lag, per-stage latency (feature/graph/model/API) logged and exposed.
+
+
+
+**Acceptance checks:**
+
+- Starting the traffic generator with a scenario injected produces, within a bounded time window, a real incident visible via `GET /incidents` and over the WebSocket stream — end to end, no manual DB inserts.
+
+
+
+**Commit checkpoint:** `phase 10 — real-time detection pipeline and incident engine`
+
+
+
+---
+
+
+
+

@@ -134,6 +134,18 @@ def get_incident(id: str, db: Session = Depends(get_db)):
     alerts = db.query(Alert).filter(Alert.incident_id == id).all()
     return {"incident": incident, "alerts": alerts}
 
+@app.get("/hosts/{id}/risk")
+def get_host_risk(id: str, db: Session = Depends(get_db)):
+    from app.models import RiskScore
+    # Get the latest risk score for this host
+    score = db.query(RiskScore).filter(RiskScore.host_id == id).order_by(RiskScore.timestamp.desc()).first()
+    if not score:
+        # Return default NORMAL risk if not found
+        from app.risk.engine import RiskEngine
+        engine = RiskEngine()
+        return engine.calculate_risk(id, 0.0, 0.0, 0.0, 0.0)
+    return score
+
 # SSE Endpoint for real-time updates
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware

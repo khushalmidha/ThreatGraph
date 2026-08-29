@@ -75,13 +75,23 @@ class Alert(Base):
 
 class Incident(Base):
     __tablename__ = "incidents"
-    incident_id = Column(String, primary_key=True, index=True)
-    timestamp = Column(DateTime, index=True)
-    primary_host_id = Column(String, index=True)
-    status = Column(String, index=True)
-    severity = Column(String, index=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    incident_id = Column(String, primary_key=True)
+    created_at = Column(DateTime)
+    updated_at = Column(DateTime)
+    title = Column(String)
+    status = Column(String) # OPEN, INVESTIGATING, RESOLVED
+    severity = Column(String)
+    target_host = Column(String)
+    risk_score = Column(Float)
+
+class RiskScore(Base):
+    __tablename__ = "risk_scores"
+    id = Column(Integer, primary_key=True, index=True)
+    host_id = Column(String, index=True)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    score = Column(Float)
+    severity_band = Column(String)
+    evidence = Column(JSON)
 
 class AttackPath(Base):
     __tablename__ = "attack_paths"

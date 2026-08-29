@@ -47,30 +47,59 @@ class DetectionWorker:
 
         logger.info("Detection worker running...")
         try:
+            from backend.app.risk.engine import RiskEngine
+            from backend.app.models import RiskScore
+            risk_engine = RiskEngine()
+            db = SessionLocal()
+            
             async for msg in consumer:
                 event = msg.value
                 host_ip = event.get('host_id', 'unknown')
                 
-                # Mock fusion model prediction
-                risk_score = 85.0 # Simulated high risk for testing
+                # Mock fusion model predictions
+                graph_prob = 0.8
+                transformer_prob = 0.9
+                anomaly = 8.5
                 
-                if risk_score > 80.0:
-                    self.handle_high_risk(host_ip, risk_score, event)
+                # Calculate real risk using the engine
+                risk_result = risk_engine.calculate_risk(
+                    host_id=host_ip,
+                    graph_prob=graph_prob,
+                    transformer_prob=transformer_prob,
+                    anomaly_score=anomaly,
+                    historical_risk=0.5
+                )
+                
+                risk_score = risk_result['score']
+                
+                # Persist risk score
+                new_risk = RiskScore(
+                    host_id=host_ip,
+                    score=risk_score,
+                    severity_band=risk_result['severity_band'],
+                    evidence=risk_result['evidence']
+                )
+                db.add(new_risk)
+                db.commit()
+                
+                if risk_score > 74.99: # HIGH or CRITICAL
+                    self.handle_high_risk(db, host_ip, risk_score, event)
                     # Stream over Kafka to be consumed by SSE/WebSockets in FastAPI
                     await producer.send_and_wait("alerts", {
                         "host_ip": host_ip,
                         "risk_score": risk_score,
+                        "severity_band": risk_result['severity_band'],
                         "timestamp": event.get('timestamp')
                     })
                 
         except asyncio.CancelledError:
             pass
         finally:
+            db.close()
             await consumer.stop()
             await producer.stop()
 
-    def handle_high_risk(self, host_ip, risk_score, event):
-        db = SessionLocal()
+    def handle_high_risk(self, db, host_ip, risk_score, event):
         try:
             # Check for active incident for this host
             active = db.query(Incident).filter(
