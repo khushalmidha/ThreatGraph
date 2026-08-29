@@ -1,5 +1,5 @@
 from sqlalchemy import Column, String, Integer, Float, DateTime, ForeignKey, Boolean
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import JSON
 from sqlalchemy.orm import relationship
 from .database import Base
 from datetime import datetime
@@ -37,7 +37,7 @@ class GraphEvent(Base):
     node_a = Column(String, index=True)
     node_b = Column(String, index=True)
     edge_type = Column(String)
-    edge_features = Column(JSONB)
+    edge_features = Column(JSON)
 
 class Feature(Base):
     __tablename__ = "features"
@@ -45,7 +45,7 @@ class Feature(Base):
     timestamp = Column(DateTime, index=True)
     host_id = Column(String, index=True)
     window_size = Column(String)
-    feature_vector = Column(JSONB)
+    feature_vector = Column(JSON)
 
 class ModelPrediction(Base):
     __tablename__ = "model_predictions"
@@ -71,7 +71,7 @@ class Alert(Base):
     timestamp = Column(DateTime, index=True)
     host_id = Column(String, index=True)
     severity = Column(String)
-    evidence = Column(JSONB)
+    evidence = Column(JSON)
 
 class Incident(Base):
     __tablename__ = "incidents"
@@ -90,7 +90,7 @@ class AttackPath(Base):
     source_host = Column(String)
     dest_host = Column(String)
     risk_contribution = Column(Float)
-    evidence = Column(JSONB)
+    evidence = Column(JSON)
 
 class RiskScore(Base):
     __tablename__ = "risk_scores"
@@ -99,7 +99,7 @@ class RiskScore(Base):
     host_id = Column(String, index=True)
     score = Column(Float)
     severity_band = Column(String)
-    evidence = Column(JSONB)
+    evidence = Column(JSON)
 
 class ContainmentAction(Base):
     __tablename__ = "containment_actions"
@@ -133,5 +133,5 @@ class ModelVersion(Base):
     version_id = Column(String, primary_key=True, index=True)
     trained_at = Column(DateTime)
     dataset_ref = Column(String)
-    metrics = Column(JSONB)
+    metrics = Column(JSON)
     is_active = Column(Boolean, default=False)

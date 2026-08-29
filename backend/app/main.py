@@ -73,11 +73,26 @@ def get_hosts(): return {"detail": "Not Implemented"}
 @app.get("/hosts/{id}/risk", status_code=status.HTTP_501_NOT_IMPLEMENTED)
 def get_host_risk(id: str): return {"detail": "Not Implemented"}
 
-@app.get("/network/graph", status_code=status.HTTP_501_NOT_IMPLEMENTED)
-def get_network_graph(): return {"detail": "Not Implemented"}
+from app.database import SessionLocal
+from app.graph.queries import get_current_topology
+from fastapi import Depends
+from sqlalchemy.orm import Session
 
-@app.get("/network/topology", status_code=status.HTTP_501_NOT_IMPLEMENTED)
-def get_network_topology(): return {"detail": "Not Implemented"}
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+@app.get("/network/graph")
+def get_network_graph(lookback_sec: int = 300, db: Session = Depends(get_db)):
+    # Topology and graph might be similar or have different formats, we use topology for now
+    return get_current_topology(db, lookback_sec)
+
+@app.get("/network/topology")
+def get_network_topology(lookback_sec: int = 300, db: Session = Depends(get_db)):
+    return get_current_topology(db, lookback_sec)
 
 @app.get("/threats", status_code=status.HTTP_501_NOT_IMPLEMENTED)
 def get_threats(): return {"detail": "Not Implemented"}
