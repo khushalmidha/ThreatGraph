@@ -63,13 +63,12 @@ services:
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   frontend:
-    image: node:20-alpine
-    working_dir: /app
-    volumes:
-      - ./frontend:/app
+    build:
+      context: ./frontend
     ports:
-      - "5173:5173"
-    command: sh -c "echo 'Frontend container running' && tail -f /dev/null"
+      - "5173:80"
+    depends_on:
+      - backend
 
 volumes:
   pgdata:
