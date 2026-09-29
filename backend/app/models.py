@@ -17,7 +17,7 @@ class Host(Base):
 class NetworkFlow(Base):
     __tablename__ = "network_flows"
     event_id = Column(String, primary_key=True, index=True)
-    timestamp = Column(DateTime, index=True)
+    timestamp = Column(DateTime, index=True, default=datetime.utcnow)
     src_ip = Column(String, index=True)
     dst_ip = Column(String, index=True)
     src_port = Column(Integer)
@@ -33,7 +33,7 @@ class NetworkFlow(Base):
 class GraphEvent(Base):
     __tablename__ = "graph_events"
     event_id = Column(String, primary_key=True, index=True)
-    timestamp = Column(DateTime, index=True)
+    timestamp = Column(DateTime, index=True, default=datetime.utcnow)
     node_a = Column(String, index=True)
     node_b = Column(String, index=True)
     edge_type = Column(String)
@@ -42,7 +42,7 @@ class GraphEvent(Base):
 class Feature(Base):
     __tablename__ = "features"
     feature_id = Column(String, primary_key=True, index=True)
-    timestamp = Column(DateTime, index=True)
+    timestamp = Column(DateTime, index=True, default=datetime.utcnow)
     host_id = Column(String, index=True)
     window_size = Column(String)
     feature_vector = Column(JSON)
@@ -50,7 +50,7 @@ class Feature(Base):
 class ModelPrediction(Base):
     __tablename__ = "model_predictions"
     prediction_id = Column(String, primary_key=True, index=True)
-    timestamp = Column(DateTime, index=True)
+    timestamp = Column(DateTime, index=True, default=datetime.utcnow)
     host_id = Column(String, index=True)
     model_version = Column(String)
     threat_probability = Column(Float)
@@ -60,7 +60,7 @@ class ModelPrediction(Base):
 class Anomaly(Base):
     __tablename__ = "anomalies"
     anomaly_id = Column(String, primary_key=True, index=True)
-    timestamp = Column(DateTime, index=True)
+    timestamp = Column(DateTime, index=True, default=datetime.utcnow)
     host_id = Column(String, index=True)
     score = Column(Float)
     description = Column(String)
@@ -68,7 +68,8 @@ class Anomaly(Base):
 class Alert(Base):
     __tablename__ = "alerts"
     alert_id = Column(String, primary_key=True, index=True)
-    timestamp = Column(DateTime, index=True)
+    incident_id = Column(String, index=True, nullable=True)
+    timestamp = Column(DateTime, index=True, default=datetime.utcnow)
     host_id = Column(String, index=True)
     severity = Column(String)
     evidence = Column(JSON)
@@ -76,8 +77,8 @@ class Alert(Base):
 class Incident(Base):
     __tablename__ = "incidents"
     incident_id = Column(String, primary_key=True)
-    created_at = Column(DateTime)
-    updated_at = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow)
     title = Column(String)
     status = Column(String) # OPEN, INVESTIGATING, RESOLVED
     severity = Column(String)
@@ -102,23 +103,15 @@ class AttackPath(Base):
     risk_contribution = Column(Float)
     evidence = Column(JSON)
 
-class RiskScore(Base):
-    __tablename__ = "risk_scores"
-    risk_id = Column(String, primary_key=True, index=True)
-    timestamp = Column(DateTime, index=True)
-    host_id = Column(String, index=True)
-    score = Column(Float)
-    severity_band = Column(String)
-    evidence = Column(JSON)
-
 class ContainmentAction(Base):
     __tablename__ = "containment_actions"
-    action_id = Column(String, primary_key=True, index=True)
-    timestamp = Column(DateTime, index=True)
+    id = Column(Integer, primary_key=True, index=True)
     host_id = Column(String, index=True)
-    policy_applied = Column(String)
+    action = Column(String) # ISOLATE, RELEASE
+    policy = Column(String) # DENY_ALL, ALLOW_ALL
     reason = Column(String)
-    status = Column(String)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    status = Column(String) # ACTIVE, ROLLED_BACK
 
 class NetworkPolicy(Base):
     __tablename__ = "network_policies"
@@ -131,34 +124,6 @@ class NetworkPolicy(Base):
 
 class AuditLog(Base):
     __tablename__ = "audit_logs"
-    log_id = Column(String, primary_key=True, index=True)
-    timestamp = Column(DateTime, index=True)
-    user_id = Column(String)
-    action = Column(String)
-    target = Column(String)
-    result = Column(String)
-
-class ModelVersion(Base):
-    __tablename__ = "model_versions"
-    version_id = Column(String, primary_key=True, index=True)
-    trained_at = Column(DateTime)
-    dataset_ref = Column(String)
-    metrics = Column(JSON)
-    is_active = Column(Boolean, default=False)
-
-class ContainmentAction(Base):
-    __tablename__ = "containment_actions"
-    id = Column(Integer, primary_key=True, index=True)
-    host_id = Column(String, index=True)
-    action = Column(String)
-    policy = Column(String)
-    reason = Column(String)
-    timestamp = Column(DateTime, default=datetime.utcnow)
-    status = Column(String)
-
-
-class AuditLog(Base):
-    __tablename__ = "audit_logs"
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(String, index=True)
     role = Column(String)
@@ -167,3 +132,10 @@ class AuditLog(Base):
     status = Column(String)
     timestamp = Column(DateTime, default=datetime.utcnow)
 
+class ModelVersion(Base):
+    __tablename__ = "model_versions"
+    version_id = Column(String, primary_key=True, index=True)
+    trained_at = Column(DateTime, default=datetime.utcnow)
+    dataset_ref = Column(String)
+    metrics = Column(JSON)
+    is_active = Column(Boolean, default=False)

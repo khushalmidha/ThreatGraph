@@ -9,12 +9,11 @@ class AttackPathBuilder:
         # We use networkx for the algorithmic implementations
         self.graph = nx.DiGraph()
         
-    def build_from_topology(self, topology: List[Dict[str, Any]]):
+    def build_from_topology(self, topology: Any):
         """Initialize the graph state from current topology."""
         self.graph.clear()
-        for edge in topology:
-            # edge format: {"source": str, "target": str, "weight": float, "timestamp": str}
-            # weight here is confidence x risk contribution
+        edges = topology.get("links", []) if isinstance(topology, dict) else (topology or [])
+        for edge in edges:
             self.graph.add_edge(
                 edge["source"], 
                 edge["target"], 
