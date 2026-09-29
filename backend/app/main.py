@@ -59,8 +59,8 @@ def startup_event():
     try:
         models.Base.metadata.create_all(bind=engine)
         from app.seed import seed_database
-        seed_database()
-        logger.info("Database initialized and verified.")
+        seed_database(force=True)
+        logger.info("Massive enterprise dataset initialized and verified.")
     except Exception as e:
         logger.error(f"Error during startup DB initialization: {e}")
 
@@ -106,9 +106,9 @@ def metrics():
 
 @app.get("/seed")
 @app.post("/seed")
-def trigger_seed(db: Session = Depends(get_db)):
+def trigger_seed(force: bool = True, db: Session = Depends(get_db)):
     from app.seed import seed_database
-    res = seed_database(db)
+    res = seed_database(db, force=force)
     return res
 
 @app.get("/hosts")
