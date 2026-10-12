@@ -11,7 +11,7 @@ function Sidebar() {
       <div className="p-6">
         <h1 className="text-2xl font-bold text-primary flex items-center gap-2">
           <ShieldAlert className="w-8 h-8" />
-          NetRaptor-X
+          ThreatGraph
         </h1>
       </div>
       <nav className="flex-1 px-4 space-y-2">

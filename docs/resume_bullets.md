@@ -1,4 +1,4 @@
-# Resume Bullets: NetRaptor-X
+# Resume Bullets: ThreatGraph
 
 These bullets are grounded in the actual metrics from `docs/ablation-study.md` and `docs/benchmarks/results.md`.
 

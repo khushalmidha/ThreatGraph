@@ -29,7 +29,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="NetRaptor-X API", version="1.0.0")
+app = FastAPI(title="ThreatGraph API", version="1.0.0")
 
 # Enable CORS for local & remote frontend
 app.add_middleware(
@@ -55,7 +55,7 @@ def get_db():
 @app.on_event("startup")
 def startup_event():
     """Ensure database tables exist and seed demo data on first boot"""
-    logger.info("Initializing NetRaptor-X backend...")
+    logger.info("Initializing ThreatGraph backend...")
     try:
         models.Base.metadata.create_all(bind=engine)
         from app.seed import seed_database

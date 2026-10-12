@@ -1,4 +1,4 @@
-# 🛡️ NetRaptor-X: AI-Driven Zero-Trust Threat Detection Platform
+# 🛡️ ThreatGraph: AI-Driven Zero-Trust Threat Intelligence Platform
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/release/python-3120/)
@@ -6,7 +6,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-009688.svg?logo=fastapi)](https://fastapi.tiangolo.com/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-EE4C2C.svg?logo=pytorch)](https://pytorch.org/)
 
-NetRaptor-X is an end-to-end, event-driven network security portfolio project. It simulates a modern Security Operations Center (SOC) pipeline by fusing real-time network telemetry with Spatial-Temporal Machine Learning and Retrieval-Augmented Generation (RAG) LLMs to detect, explain, and contain anomalous behaviors like lateral movement and data exfiltration.
+ThreatGraph is an end-to-end, event-driven network security platform. It simulates a modern Security Operations Center (SOC) pipeline by fusing real-time network telemetry with Spatial-Temporal Machine Learning and Retrieval-Augmented Generation (RAG) LLMs to detect, explain, and contain anomalous behaviors like lateral movement and data exfiltration.
 
 ---
 
@@ -28,11 +28,13 @@ Detecting modern network threats requires understanding two critical dimensions:
 1. **Spatial (Who talks to whom?)**: Graph Neural Networks (GNNs) map the network topology to identify anomalous structural edges.
 2. **Temporal (How do they talk over time?)**: Transformers model behavioral shifts, identifying sudden spikes in payload sizes or connection frequencies.
 
-**NetRaptor-X** fuses both representations, yielding a highly accurate Risk Score that drastically outperforms standalone temporal or spatial models.
+**ThreatGraph** fuses both representations, yielding a highly accurate Risk Score that drastically outperforms standalone temporal or spatial models.
 
 ---
 
 ## 🏗️ Architecture
+
+### 1. End-to-End System Architecture
 
 ```mermaid
 graph TD
@@ -45,18 +47,18 @@ graph TD
     classDef frontend fill:#1e293b,stroke:#0ea5e9,stroke-width:2px,color:#fff
     
     subgraph "1. Data Generation & Ingestion"
-        TG[Traffic Generator <br> Python / Synthetic]:::generator
-        ZTA[Zero-Trust Zones <br> Web/App/DB]:::generator
-        Kafka[(Kafka Event Stream <br> Raw Flows & Logs)]:::messageBus
+        TG[Traffic Generator <br> Python / Synthetic Flows]:::generator
+        ZTA[Zero-Trust Zones <br> Web / App / DB Enclaves]:::generator
+        Kafka[(Kafka Event Stream <br> 3,000+ Flows/sec)]:::messageBus
         
         TG -->|Simulated Network Traffic| ZTA
-        ZTA -->|Telemetry| Kafka
+        ZTA -->|Telemetry Events| Kafka
     end
 
-    subgraph "2. Stream Processing & State"
-        GraphWorker[Graph Worker <br> Real-time Edge Updates]:::processing
-        FeatExtractor[Feature Extractor <br> Temporal Windows]:::processing
-        NX[(In-Memory Graph <br> NetworkX)]:::datastore
+    subgraph "2. Stream Processing & Topology State"
+        GraphWorker[Graph Worker <br> Real-time Edge Aggregator]:::processing
+        FeatExtractor[Feature Extractor <br> Sliding Window Tensorizer]:::processing
+        NX[(In-Memory Graph <br> NetworkX State)]:::datastore
         
         Kafka --> GraphWorker
         Kafka --> FeatExtractor
@@ -65,45 +67,106 @@ graph TD
     end
 
     subgraph "3. AI Threat Detection Engine"
-        GNN[Graph Neural Network <br> Spatial Context]:::mlEngine
-        Transformer[Time-Series Transformer <br> Temporal Behavior]:::mlEngine
-        Fusion[Fusion Layer <br> MLP Classifier]:::mlEngine
+        GNN[Temporal GNN <br> GATv2Conv + GRUCell]:::mlEngine
+        Transformer[Time-Series Transformer <br> 4-Head Self-Attention]:::mlEngine
+        Fusion[Cross-Modal Fusion Layer <br> MLP + Dropout]:::mlEngine
+        RiskEngine[Explainable Risk Engine <br> 0 - 100 Severity Scorer]:::processing
         
-        NX -->|Node Neighborhoods| GNN
-        NX -->|Historical Features| Transformer
-        GNN --> Fusion
-        Transformer --> Fusion
-        Fusion -->|Risk Score 0.0 - 1.0| RiskEngine[Risk Evaluation Engine]:::processing
+        NX -->|Node Subgraphs| GNN
+        NX -->|Sequential Telemetry| Transformer
+        GNN -->|Spatial Embedding| Fusion
+        Transformer -->|Temporal Embedding| Fusion
+        Fusion -->|Fused Vector| RiskEngine
     end
 
-    subgraph "4. Automated Response & SOC"
-        IncidentDB[(Incident Database <br> SQLite/JSON)]:::datastore
-        AttackGraph[Attack Path Engine <br> Dijkstra/BFS]:::processing
-        LLM[RAG SOC Analyst <br> GPT/Local LLM]:::mlEngine
-        FAISS[(FAISS Vector Store <br> MITRE ATT&CK)]:::datastore
-        Containment[Software Firewall <br> Policy Enforcement]:::processing
+    subgraph "4. Automated Incident Response & Copilot"
+        IncidentDB[(Incident Database <br> PostgreSQL Store)]:::datastore
+        AttackGraph[Attack Path Engine <br> Dijkstra / Multi-Source BFS]:::processing
+        FAISS[(FAISS Vector DB <br> MITRE ATT&CK Embeddings)]:::datastore
+        RAG[RAG SOC Copilot <br> MITRE Evidence Synthesizer]:::mlEngine
+        Containment[Software-Defined Firewall <br> Zero-Trust Policy Engine]:::processing
         
-        RiskEngine -->|Score > 80| IncidentDB
-        RiskEngine -->|Trigger| AttackGraph
+        RiskEngine -->|Risk Score > 80| IncidentDB
+        RiskEngine -->|Trigger Triage| AttackGraph
         NX --> AttackGraph
-        AttackGraph -->|Blast Radius| LLM
-        FAISS -->|Context Retrieval| LLM
+        AttackGraph -->|Lateral Hop Sequence| RAG
+        FAISS -->|Technique Match: T1021 / T1059| RAG
         IncidentDB --> Containment
         Containment -.->|Quarantine / Drop Traffic| ZTA
     end
 
-    subgraph "5. Presentation Layer"
-        FastAPI[FastAPI Backend <br> REST & SSE]:::processing
-        ReactUI[React + Vite Dashboard <br> TailwindCSS]:::frontend
+    subgraph "5. SOC Command Center"
+        FastAPI[FastAPI Backend <br> REST API & SSE Streams]:::processing
+        ReactUI[React + Vite Dashboard <br> D3 Force Graph Visualizer]:::frontend
         
         IncidentDB --> FastAPI
-        LLM --> FastAPI
+        RAG --> FastAPI
         Containment --> FastAPI
-        FastAPI -->|Live Updates| ReactUI
+        FastAPI -->|Live Incident Feeds| ReactUI
     end
 ```
 
-*(For more details, see [docs/architecture.md](docs/architecture.md))*
+### 2. Spatial-Temporal Deep Learning Architecture
+
+```mermaid
+flowchart LR
+    %% Subgraph 1: Inputs
+    subgraph Inputs ["Input Telemetry Streams"]
+        A1["Graph Topology<br>(Nodes: Hosts, Edges: Flows)"]
+        A2["Host Sliding Windows<br>(Sequence Length T x Features)"]
+    end
+
+    %% Subgraph 2: Encoders
+    subgraph Encoders ["Dual-Tower Encoders"]
+        B1["GATv2Conv Layers<br>(Dynamic Edge Attention)"]
+        B2["GRUCell<br>(Graph Temporal State)"]
+        B3["Transformer Encoder<br>(2 Layers, 4 Attention Heads)"]
+        
+        A1 --> B1 --> B2
+        A2 --> B3
+    end
+
+    %% Subgraph 3: Embeddings
+    subgraph Repr ["Embeddings"]
+        C1["Spatial Representation<br>e_gnn (Mean Pooled)"]
+        C2["Temporal Representation<br>e_transformer (Last Step)"]
+        B2 --> C1
+        B3 --> C2
+    end
+
+    %% Subgraph 4: Fusion
+    subgraph FusionBlock ["Cross-Modal Fusion"]
+        D1["Concatenate: [e_gnn || e_transformer]"]
+        D2["Linear(hidden*2 -> hidden) + ReLU + Dropout(0.2)"]
+        C1 --> D1
+        C2 --> D1
+        D1 --> D2
+    end
+
+    %% Subgraph 5: Multi-Task Heads
+    subgraph Heads ["Multi-Task Prediction Heads"]
+        E1["Threat Probability<br>Sigmoid in [0, 1]"]
+        E2["Anomaly Score<br>Continuous Regression"]
+        E3["Threat Classification<br>Normal / Lateral / Exfil"]
+        D2 --> E1
+        D2 --> E2
+        D2 --> E3
+    end
+
+    %% Subgraph 6: Downstream
+    subgraph Downstream ["Risk Engine & Response"]
+        F1["Weighted Risk Formula<br>(0.4 GNN + 0.3 Trans + 0.2 Anom + 0.1 Hist)"]
+        F2["FAISS Vector Retrieval<br>(MITRE ATT&CK T1021 / T1059)"]
+        F3["Automated Zero-Trust Quarantine<br>(sub-50ms isolation)"]
+        
+        E1 --> F1
+        E2 --> F1
+        F1 -->|Score > 80| F2
+        F1 -->|Critical Alert| F3
+    end
+```
+
+*(For detailed architectural specifications, see [docs/architecture.md](docs/architecture.md))*
 
 ---
 
@@ -178,4 +241,4 @@ While this project is a functional end-to-end prototype, some components are moc
 
 ---
 
-### Developed as part of the NetRaptor-X initiative.
+### Developed as part of the ThreatGraph initiative.
