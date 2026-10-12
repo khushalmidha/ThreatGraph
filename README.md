@@ -5,6 +5,7 @@
 [![React 18](https://img.shields.io/badge/react-18.0%2B-blue.svg)](https://reactjs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-009688.svg?logo=fastapi)](https://fastapi.tiangolo.com/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-EE4C2C.svg?logo=pytorch)](https://pytorch.org/)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-threatgraph.duckdns.org-brightgreen.svg)](http://threatgraph.duckdns.org/)
 
 ThreatGraph is an end-to-end, event-driven network security platform. It simulates a modern Security Operations Center (SOC) pipeline by fusing real-time network telemetry with Spatial-Temporal Machine Learning and Retrieval-Augmented Generation (RAG) LLMs to detect, explain, and contain anomalous behaviors like lateral movement and data exfiltration.
 
