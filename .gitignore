@@ -3,6 +3,7 @@ venv/
 .venv/
 env/
 ENV/
+*.venv/
 
 # Python Cache & Bytecode
 __pycache__/
@@ -11,20 +12,36 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
 
-# Environment Variables
+# Environment Variables & Secrets
 .env
 .env.local
 .env.*.local
+*.pem
+*.key
+!*.example
 !.env.example
 
-# IDE & OS
+# Model Weights & Binary Checkpoints
+*.pt
+*.pth
+*.onnx
+*.bin
+checkpoints/
+exports/*.pt
+
+# Database & Runtime Logs
+*.log
+*.sqlite3
+*.db
+data/processed/
+
+# IDE & OS Artifacts
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
-
-# Logs & Database
-*.log
-data/processed/
-*.sqlite3

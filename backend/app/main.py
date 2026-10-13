@@ -88,6 +88,10 @@ def check_kafka():
     except Exception:
         return False
 
+@app.get("/")
+def root():
+    return {"status": "ok", "service": "ThreatGraph API"}
+
 @app.get("/health")
 def health_check():
     db_ok = check_postgres()

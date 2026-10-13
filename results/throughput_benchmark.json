@@ -1,0 +1,60 @@
+{
+  "benchmark_timestamp": "2026-10-13T10:58:15Z",
+  "hardware": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 154 Stepping 4, GenuineIntel",
+    "cpu_count_physical": 10,
+    "cpu_count_logical": 12,
+    "ram_gb": 15.73,
+    "python_version": "3.12.0",
+    "torch_version": "2.13.0+cpu",
+    "cuda_available": false
+  },
+  "scope_A_model_inference": {
+    "scope": "A. Batched Model Inference (FusionModel CPU)",
+    "total_events_measured": 99968,
+    "batch_size": 64,
+    "num_batches": 1562,
+    "runs": 3,
+    "throughput_events_per_sec": 3193.8,
+    "throughput_std_eps": 1552.15,
+    "latency_per_batch_ms": {
+      "mean": 26.393,
+      "p50": 14.277,
+      "p95": 67.985,
+      "p99": 97.228
+    },
+    "latency_per_event_us": 412.39
+  },
+  "scope_B_feature_extraction": {
+    "scope": "B. Event Feature State Updates (HostFeatureState)",
+    "total_events": 50000,
+    "duration_seconds": 2.6253,
+    "throughput_events_per_sec": 19045.36,
+    "latency_per_event_us": 52.506
+  },
+  "scope_C_attack_path_reconstruction": {
+    "scope": "C. Attack-Path Reconstruction (Dijkstra + Multi-Source BFS)",
+    "num_queries": 200,
+    "mean_latency_ms": 0.098,
+    "p50_latency_ms": 0.075,
+    "p95_latency_ms": 0.143,
+    "p99_latency_ms": 0.365
+  },
+  "scope_D_containment_decision": {
+    "scope": "D. Containment Policy Decision (RiskEngine + SimulatedFirewall)",
+    "num_evaluations": 500,
+    "mean_latency_us": 19.19,
+    "p50_latency_us": 15.5,
+    "p95_latency_us": 20.91,
+    "p99_latency_us": 112.32
+  },
+  "scope_E_composite_pipeline": {
+    "scope": "E. Composite In-Process Pipeline (Features + Model + Risk)",
+    "in_process_streaming_backend": "Python in-process queues / sliding window memory buffer",
+    "kafka_architecture_compatibility": "Kafka-compatible pipeline interface; local throughput benchmark uses in-process queue backend",
+    "composite_throughput_eps": 2065.75,
+    "composite_latency_per_batch_ms": 30.982,
+    "composite_latency_per_event_ms": 0.4841
+  }
+}

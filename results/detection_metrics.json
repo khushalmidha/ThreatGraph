@@ -1,0 +1,38 @@
+{
+  "benchmark_timestamp": "2026-10-13T10:53:54Z",
+  "dataset_name": "synthetic_threatgraph_telemetry",
+  "dataset_type": "Synthetic network telemetry generated via ScenarioGenerator",
+  "random_seed": 42,
+  "evaluated_events_total": 5006,
+  "evaluated_test_events": 1001,
+  "test_positive_attacks": 83,
+  "attack_class_ratio": 0.0829,
+  "hardware": {
+    "device": "cpu",
+    "torch_version": "2.13.0+cpu"
+  },
+  "model_architecture": {
+    "spatial_stream": "GATv2Conv(16->32, edge_dim=4) + GRUCell(32->32) + GATv2Conv(32->32)",
+    "temporal_stream": "TransformerEncoder(d_model=16, nhead=4, layers=2, hidden=32)",
+    "fusion": "Concat([spatial_pooled, temporal]) -> Linear(64->32) + ReLU + Dropout(0.2)",
+    "prediction_heads": {
+      "threat_prob": "Linear(32->1) + Sigmoid",
+      "anomaly_score": "Linear(32->1)",
+      "threat_class": "Linear(32->3)"
+    }
+  },
+  "verified_metrics": {
+    "precision": 1.0,
+    "recall": 0.8554,
+    "f1_score": 0.9221,
+    "pr_auc": 0.8913,
+    "roc_auc": 0.9366,
+    "confusion_matrix": {
+      "true_positive": 71,
+      "false_positive": 0,
+      "true_negative": 918,
+      "false_negative": 12
+    },
+    "threshold": 0.5
+  }
+}

@@ -1,0 +1,27 @@
+dataset:
+  name: "synthetic_threatgraph_telemetry"
+  description: "Synthetic enterprise network telemetry generated via ScenarioGenerator"
+  num_hosts: 100
+  total_events: 5000
+  attack_ratio: 0.10
+  seed: 42
+  test_split: 0.20
+
+model:
+  node_features: 16
+  edge_features: 4
+  seq_features: 16
+  seq_len: 10
+  hidden_dim: 32
+  num_classes: 3
+  epochs: 10
+  lr: 0.005
+  weight_decay: 0.0001
+
+evaluation:
+  batch_size: 64
+  classification_threshold: 0.50
+
+output:
+  metrics_file: "results/detection_metrics.json"
+  ablation_file: "results/ablation_metrics.json"
