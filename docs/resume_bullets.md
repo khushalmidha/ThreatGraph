@@ -12,7 +12,7 @@ These resume bullets are strictly verified against reproducible codebase impleme
 {\href{https://github.com/khushalmidha/ThreatGraph}{ThreatGraph \faGithub}}{\textit{Jan 2026 - May 2026}}
 {\textbf{Python}, \textbf{PyTorch Geometric}, \textbf{Transformers}, \textbf{GNNs}, \textbf{FAISS}, \textbf{FastAPI}}{}
 \begin{enumerate}
-\item Architected a spatial-temporal \textbf{GNN + Transformer} fusion engine evaluated on \textbf{synthetic network telemetry}, achieving \textbf{0.943 PR-AUC} and \textbf{0.899 F1-score} with \textbf{3.1K+ events/sec} batched CPU inference.
+\item Architected a spatiotemporal \textbf{GNN + Transformer} fusion engine evaluated on \textbf{synthetic network telemetry}, achieving \textbf{0.943 PR-AUC} and \textbf{0.899 F1-score} with \textbf{3.1K+ events/sec} batched CPU inference.
 \item Engineered automated \textbf{attack-path reconstruction} and a \textbf{graph-aware RAG} pipeline over MITRE ATT\&CK knowledge, tracing multi-hop lateral movement and triggering simulated zero-trust containment.
 \end{enumerate}
 \vspace{-17pt}
@@ -24,7 +24,7 @@ These resume bullets are strictly verified against reproducible codebase impleme
 
 ### Bullet 1: Spatial-Temporal GNN + Transformer Fusion Engine
 * **Bullet Text**:
-  > *Architected a spatial-temporal GNN + Transformer fusion engine evaluated on synthetic network telemetry, achieving 0.943 PR-AUC and 0.899 F1-score with 3.1K+ events/sec batched CPU inference.*
+  > *Architected a spatiotemporal GNN + Transformer fusion engine evaluated on synthetic network telemetry, achieving 0.943 PR-AUC and 0.899 F1-score with 3.1K+ events/sec batched CPU inference.*
 * **Architecture Verification**:
   - GNN: 2-layer `GATv2Conv(16 -> 32, edge_dim=4)` with dynamic edge attention + `GRUCell(32, 32)` for persistent temporal node states ([`ml/models/gnn.py`](../ml/models/gnn.py)).
   - Transformer: 2-layer `TransformerEncoder` ($d_{\text{model}}=16$, 4 heads, $d_{\text{ff}}=32$) processing temporal sliding sequences of length $T=10$ with sinusoidal positional encoding ([`ml/models/transformer.py`](../ml/models/transformer.py)).
