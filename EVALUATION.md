@@ -13,11 +13,12 @@ This document establishes the scientific audit, reproducible benchmarks, and emp
 | **GNN Architecture** | `ml/models/gnn.py` | `pytest tests/` | 2-layer GATv2Conv + GRUCell | Synthetic host graph topology ($N=50$, edge features $d=4$) |
 | **Transformer Architecture** | `ml/models/transformer.py` | `pytest tests/` | 2-layer TransformerEncoder ($d=16$, 4 heads) | Sliding temporal window ($T=10$ events) |
 | **Spatial-Temporal Fusion** | `ml/models/fusion.py` | `python evaluation/run_detection_benchmark.py` | Concatenation + Dense bottleneck + Multi-task heads | Joint optimization over synthetic anomaly & threat classes |
-| **PR-AUC = 0.92** | `results/detection_metrics.json` | `python evaluation/run_detection_benchmark.py` | **0.8913** (Full-Fusion)<br>**0.9431** (GNN+Transformer) | Test split (1,001 events, 8.3% positive attack imbalance) |
-| **F1-Score = 0.89** | `results/detection_metrics.json` | `python evaluation/run_detection_benchmark.py` | **0.9221** (Full-Fusion)<br>**0.8987** (GNN+Transformer) | Precision: 1.000 / Recall: 0.8554 (threshold $\tau = 0.5$) |
-| **3.1K+ Events/Sec** | `results/throughput_benchmark.json` | `python benchmarks/throughput.py --events 100000` | **3,193.80 events/sec** | Scope A: Batched model inference on CPU (batch size 64) |
+| **GNN + Transformer PR-AUC** | `results/ablation_metrics.json` | `python evaluation/run_detection_benchmark.py` | **0.9431** (0.943 reported) | Evaluated on test split (1,001 events, 8.3% positive attack imbalance) |
+| **GNN + Transformer F1-Score** | `results/ablation_metrics.json` | `python evaluation/run_detection_benchmark.py` | **0.8987** (0.899 reported) | Precision: 0.9467 / Recall: 0.8554 (threshold $\tau = 0.5$) |
+| **Batched CPU Inference Throughput** | `results/throughput_benchmark.json` | `python benchmarks/throughput.py --events 100000` | **3,193.80 events/sec** (3.1K+ reported) | Scope A: Batched model inference on CPU (batch size 64) |
+| **Composite Pipeline Throughput** | `results/throughput_benchmark.json` | `python benchmarks/throughput.py --events 100000` | **2,065.75 events/sec** (2.0K+ reported) | Scope E: End-to-end composite pipeline (Features + Model + Policy) |
 | **Attack-Path Reconstruction** | `backend/app/graph/attack_path.py` | `pytest tests/test_attack_path.py` | Risk-weighted Dijkstra ($w=\frac{1}{\text{risk}+\epsilon}$) + BFS blast radius | Deterministic multi-hop chain tracing with causal timestamp enforcement |
-| **Graph-Aware RAG** | `rag/engine.py` | `pytest tests/test_rag.py` | FAISS `IndexFlatIP` over 13 MITRE ATT&CK techniques + Runbooks | Cosine similarity vector search over text embeddings; graph-grounded query synthesis |
+| **Graph-Aware RAG** | `rag/engine.py` | `pytest tests/test_rag.py` | FAISS `IndexFlatIP` over 10 MITRE techniques + 3 Runbooks | Cosine similarity vector search over text embeddings; graph-grounded query synthesis |
 | **Simulated Zero-Trust Containment** | `backend/simulation/policies.py` | `pytest tests/test_containment.py` | Policy engine with threshold $\tau \ge 80.0$, zone ACL isolation & rollback | Simulated firewall state; no live kernel/eBPF/EDR modification |
 | **Kafka-Compatible Ingestion** | `backend/worker_detection.py` | `python benchmarks/throughput.py` | Local benchmark: in-process queue (2,065.75 eps composite) | `aiokafka` consumer interface implemented; local evaluation runs queue backend |
 
@@ -81,17 +82,25 @@ To scientifically isolate the contribution of spatial graph structure versus tem
 | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
 | **Temporal-GNN-Only** | 0.9259 | 0.3012 | 0.4545 | 0.6983 | 0.9238 | High precision on topology anomalies, but struggles with sequence context. |
 | **Transformer-Only** | 0.9342 | 0.8554 | 0.8931 | 0.8972 | 0.9394 | Strong temporal sequence detection; captures burst anomalies. |
-| **GNN + Transformer** | 0.9467 | 0.8554 | **0.8987** | **0.9431** | **0.9796** | Balances spatial context with temporal sequence, highest PR-AUC. |
+| **GNN + Transformer** | 0.9467 | 0.8554 | **0.8987** | **0.9431** | **0.9796** | Balances spatial context with temporal sequence; highest PR-AUC. |
 | **Full-Fusion (Multi-Head)** | **1.0000** | 0.8554 | **0.9221** | **0.8913** | **0.9366** | Zero false positives ($\text{FP}=0$); best F1 score on imbalanced test set. |
 
-*Resume Alignment Note*: The resume claim of **0.92 PR-AUC and 0.89 F1-score** accurately reflects these verified figures (GNN+Transformer achieves **0.8987 F1 / 0.9431 PR-AUC**; Full-Fusion achieves **0.9221 F1 / 0.8913 PR-AUC**).
+*Resume Alignment & Variant Precision*:
+- The primary resume bullet specifies the **GNN + Transformer** fusion engine: achieving **0.943 PR-AUC** and **0.899 F1-score** (verified precisely at **0.9431** and **0.8987**).
+- Avoid mixing metrics across variants: do not combine the Full-Fusion F1 (0.922) with the GNN+Transformer PR-AUC (0.943). Each variant's metrics are reported strictly from its own evaluation run.
+- The Full-Fusion multi-task model achieves **0.9221 F1-score** and **0.8913 PR-AUC** with $\text{FP}=0$.
 
 ---
 
 ## 3. Throughput & Latency Benchmark Suite
 
-### Verification of the "3.1K+ simulated events/sec" Claim
-The 3.1K+ events/sec throughput was benchmarked on CPU across 100,000 synthetic events without mock delays.
+### Verification of the "3.1K+ events/sec batched CPU inference" Claim
+The 3.1K+ events/sec throughput was benchmarked on CPU across 100,000 synthetic events without mock delays, measuring batched model inference execution.
+
+> **Throughput Scope Clarification**:
+> - **Scope A (Batched Model Inference)**: **3,193.80 events/sec** on CPU (batch size 64). This supports the resume statement: *"with 3.1K+ events/sec batched CPU inference"*.
+> - **Scope B (Feature-State Processing)**: **19,045.36 events/sec** (in-memory monotonic deques and Fenwick trees).
+> - **Scope E (Composite End-to-End Pipeline)**: **2,065.75 events/sec** (full pipeline including feature extraction, tensorization, batched inference, and risk thresholding).
 
 ### Benchmark Command
 ```bash
@@ -187,20 +196,22 @@ To prevent ambiguity between model inference, feature engineering, and network I
 - **Implementation**: `rag/engine.py` (`GraphAwareRAGEngine`)
 - **Terminology Justification**: Named **"Graph-Aware RAG"** rather than formal GraphRAG because retrieval utilizes graph-extracted entities, topological hops, and reconstructed attack paths to synthesize vector search queries over MITRE ATT&CK knowledge documents, rather than constructing a hierarchical community graph index.
 - **Vector Search Index**: FAISS `IndexFlatIP` (Exact Inner Product / Cosine Similarity over L2-normalized embeddings).
-- **Indexed Corpus**: 13 curated MITRE ATT&CK Enterprise techniques and incident response runbooks:
-  - T1021.001 (Remote Desktop Protocol)
-  - T1021.002 (SMB/Windows Admin Shares)
-  - T1021.004 (SSH Lateral Movement)
-  - T1059 (Command and Scripting Interpreter)
-  - T1071.001 (Web Protocols C2)
-  - T1071.004 (DNS Tunneling C2)
-  - T1046 (Network Service Discovery)
-  - T1078 (Valid Accounts Abuse)
-  - T1048 (Exfiltration Over Alternative Protocol)
-  - T1486 (Data Encrypted for Impact)
-  - RB-001 (RDP Lateral Movement Containment Runbook)
-  - RB-002 (SMB/Pass-the-Hash Isolation Runbook)
-  - RB-003 (C2 DNS Exfiltration Mitigation Runbook)
+- **Indexed Corpus**: Exactly **10 curated MITRE ATT&CK Enterprise techniques** plus **3 SOC incident response runbooks** (13 total documents indexed):
+  - **10 MITRE ATT&CK Enterprise Techniques**:
+    1. `T1059` (Command and Scripting Interpreter — Execution)
+    2. `T1021.001` (Remote Desktop Protocol — Lateral Movement)
+    3. `T1021.002` (SMB/Windows Admin Shares — Lateral Movement)
+    4. `T1021.004` (SSH — Lateral Movement)
+    5. `T1071.001` (Web Protocols HTTP/HTTPS C2 — Command and Control)
+    6. `T1071.004` (DNS Tunneling C2 — Command and Control)
+    7. `T1046` (Network Service Discovery — Discovery)
+    8. `T1078` (Valid Accounts Abuse — Defense Evasion / Initial Access)
+    9. `T1048` (Exfiltration Over Alternative Protocol — Exfiltration)
+    10. `T1486` (Data Encrypted for Impact / Ransomware — Impact)
+  - **3 SOC Incident Response Runbooks**:
+    1. `RB-001` (High-Risk Lateral Movement Containment Runbook)
+    2. `RB-002` (Outbound C2 Beaconing Mitigation Runbook)
+    3. `RB-003` (Critical Data Exfiltration Containment Runbook)
 - **Top-$K$ Retrieval**: Configured to $k=3$ with minimum cosine similarity threshold 0.15.
 - **Query Grounding**: Graph entities (source host, destination host, port numbers, observed protocol, reconstructed path hops) are deterministically compiled into structured triage prompts.
 

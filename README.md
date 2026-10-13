@@ -27,7 +27,7 @@
 
 1. **Dual-Tower Spatial-Temporal Fusion Engine**: Couples a 2-layer Graph Attention Network (`GATv2Conv`) + `GRUCell` with a 2-layer sequence `TransformerEncoder` to detect stealthy multi-hop intrusions across synthetic network flows.
 2. **Automated Attack-Path Reconstruction**: Traces causal lateral movement corridors using risk-weighted Dijkstra shortest-path algorithms ($w = \frac{1}{\text{risk} + \epsilon}$) with strict monotonic temporal causal ordering ($t_i \le t_{i+1}$) and multi-source BFS blast-radius mapping.
-3. **Graph-Aware RAG SOC Copilot**: Extracts graph entities, lateral hop sequences, and protocol contexts to formulate grounded queries over a FAISS vector index (`IndexFlatIP`) indexing 13 MITRE ATT&CK techniques and incident response runbooks.
+3. **Graph-Aware RAG SOC Copilot**: Extracts graph entities, lateral hop sequences, and protocol contexts to formulate grounded queries over a FAISS vector index (`IndexFlatIP`) indexing **10 MITRE ATT&CK Enterprise techniques** and **3 incident response runbooks** (13 total documents).
 4. **Simulated Zero-Trust Containment**: An in-memory micro-segmentation policy engine that dynamically evaluates risk scores ($\tau \ge 80.0$) to isolate compromised hosts and enforce ACL blocks with complete rollback capabilities.
 5. **Event-Driven Streaming Ingestion**: Kafka-compatible pipeline abstraction capable of streaming high-volume telemetry through monotonic deques and Fenwick trees into batched tensor representations.
 
@@ -124,6 +124,11 @@ Evaluated on **1,001 test events** (80/20 temporal split of 5,006 synthetic even
 | **GNN + Transformer** | 0.9467 | 0.8554 | **0.8987** | **0.9431** | **0.9796** | Fuses spatial propagation with temporal bursts; highest PR-AUC. |
 | **Full-Fusion (Multi-Head)** | **1.0000** | 0.8554 | **0.9221** | **0.8913** | **0.9366** | Joint multi-task optimization eliminates false positives ($\text{FP}=0$). |
 
+*Model Variant & Resume Metric Alignment*:
+- **GNN + Transformer**: Evaluated at **0.9431 PR-AUC** and **0.8987 F1-score** (reported on resume as **0.943 PR-AUC** and **0.899 F1-score**), with **3,193.80 events/sec** batched CPU inference.
+- **Full-Fusion**: Evaluated at **0.9221 F1-score** and **0.8913 PR-AUC** with $\text{FP}=0$.
+- Each variant's metrics are reported strictly from its own isolated evaluation run.
+
 *Reproduce the detection benchmark:*
 ```bash
 python evaluation/run_detection_benchmark.py --config configs/eval.yaml
@@ -185,18 +190,22 @@ All edge cases (cycles, disconnected components, unreachable targets, competing 
 Rather than treating RAG as unstructured text search or claiming formal hierarchical GraphRAG:
 - **Graph-Aware Query Formulation**: The copilot extracts structured context from the attack graph (pivot hosts, targeted destination, observed port, protocol, and reconstructed multi-hop path).
 - **FAISS Vector Index**: Embeds text using term-weighted projection vectors into a FAISS `IndexFlatIP` index (exact cosine similarity).
-- **Curated MITRE ATT&CK Corpus**: Indexes 13 enterprise techniques and mitigation runbooks:
-  - `T1021.001`: Remote Desktop Protocol lateral movement
-  - `T1021.002`: SMB / Windows Admin Shares lateral movement
-  - `T1021.004`: SSH Remote Services lateral movement
-  - `T1059`: Command & Scripting Interpreter execution
-  - `T1071.001`: Web Protocol C2 beaconing
-  - `T1071.004`: DNS Tunneling & Exfiltration
-  - `T1046`: Network Service Discovery / Port Scans
-  - `T1078`: Valid Accounts Privilege Abuse
-  - `T1048`: Exfiltration over Alternative Protocols
-  - `T1486`: Data Encrypted for Impact (Ransomware)
-  - `RB-001`, `RB-002`, `RB-003`: Incident triage runbooks for RDP, SMB, and DNS isolation
+- **Curated MITRE ATT&CK Corpus**: Indexes **10 MITRE ATT&CK Enterprise techniques** plus **3 incident response runbooks** (13 total documents indexed):
+  - **10 MITRE ATT&CK Techniques**:
+    - `T1059`: Command & Scripting Interpreter execution
+    - `T1021.001`: Remote Desktop Protocol (RDP) lateral movement
+    - `T1021.002`: SMB / Windows Admin Shares lateral movement
+    - `T1021.004`: SSH Remote Services lateral movement
+    - `T1071.001`: Web Protocol HTTP/HTTPS C2 beaconing
+    - `T1071.004`: DNS Tunneling & Exfiltration
+    - `T1046`: Network Service Discovery / Port Scans
+    - `T1078`: Valid Accounts Privilege Abuse
+    - `T1048`: Exfiltration Over Alternative Protocol
+    - `T1486`: Data Encrypted for Impact (Ransomware)
+  - **3 Incident Response Runbooks**:
+    - `RB-001`: High-Risk Lateral Movement Containment Runbook
+    - `RB-002`: Outbound C2 Beaconing Mitigation Runbook
+    - `RB-003`: Critical Data Exfiltration Containment Runbook
 - **Grounded Triage Generation**: Retrieves top-$k=3$ relevant techniques and runbooks, synthesizing an incident report with recommended containment steps.
 
 ---
